@@ -21,6 +21,10 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentDto saveStudent(StudentDto studentDto) {
 
+        if(studentRepository.existsByDni(studentDto.getDni())) {
+            throw new IllegalArgumentException("Dni already exists");
+        }
+
         Student student = Mapper.toEntity(studentDto);
 
         return Mapper.toDto(studentRepository.save(student));
