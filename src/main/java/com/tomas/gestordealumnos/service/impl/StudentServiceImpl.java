@@ -39,9 +39,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentDto findStudentById(UUID id) {
 
-        Student student = studentRepository.findByUuid(id)
-                .orElseThrow(() ->
-                        new StudentNotFoundException("Student not found"));
+        Student student = findStudentByUuid(id);
 
         return Mapper.toDto(student);
     }
@@ -49,8 +47,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentDto updateStudent(UUID id, StudentDto studentDto) {
 
-        Student existingStudent = studentRepository.findByUuid(id)
-                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
+        Student existingStudent = findStudentByUuid(id);
 
         existingStudent.setFirstName(studentDto.getFirstName());
         existingStudent.setLastName(studentDto.getLastName());
@@ -62,10 +59,14 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void deleteStudentById(UUID id) {
 
-        Student student = studentRepository.findByUuid(id)
-                .orElseThrow(() ->
-                        new StudentNotFoundException("Student not found"));
+        Student student = findStudentByUuid(id);
 
         studentRepository.delete(student);
+    }
+
+    private Student findStudentByUuid(UUID uuid) {
+
+        return studentRepository.findByUuid(uuid)
+                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
     }
 }
