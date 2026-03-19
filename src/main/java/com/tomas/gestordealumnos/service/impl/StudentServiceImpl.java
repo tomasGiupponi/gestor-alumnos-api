@@ -2,7 +2,7 @@ package com.tomas.gestordealumnos.service.impl;
 
 import com.tomas.gestordealumnos.dto.StudentDto;
 import com.tomas.gestordealumnos.exception.StudentNotFoundException;
-import com.tomas.gestordealumnos.mapper.Mapper;
+import com.tomas.gestordealumnos.mapper.StudentMapper;
 import com.tomas.gestordealumnos.model.Student;
 import com.tomas.gestordealumnos.repository.StudentRepository;
 import com.tomas.gestordealumnos.service.StudentService;
@@ -25,15 +25,15 @@ public class StudentServiceImpl implements StudentService {
             throw new IllegalArgumentException("Dni already exists");
         }
 
-        Student student = Mapper.toEntity(studentDto);
+        Student student = StudentMapper.toEntity(studentDto);
 
-        return Mapper.toDto(studentRepository.save(student));
+        return StudentMapper.toDto(studentRepository.save(student));
     }
 
     @Override
     public List<StudentDto> findAllStudents() {
 
-        return studentRepository.findAll().stream().map(Mapper::toDto).toList();
+        return studentRepository.findAll().stream().map(StudentMapper::toDto).toList();
     }
 
     @Override
@@ -41,7 +41,7 @@ public class StudentServiceImpl implements StudentService {
 
         Student student = findStudentByUuid(id);
 
-        return Mapper.toDto(student);
+        return StudentMapper.toDto(student);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class StudentServiceImpl implements StudentService {
         existingStudent.setLastName(studentDto.getLastName());
         existingStudent.setDni(studentDto.getDni());
 
-        return Mapper.toDto(studentRepository.save(existingStudent));
+        return StudentMapper.toDto(studentRepository.save(existingStudent));
     }
 
     @Override
