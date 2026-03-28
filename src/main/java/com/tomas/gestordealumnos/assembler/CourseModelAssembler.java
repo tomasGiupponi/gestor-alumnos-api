@@ -14,6 +14,11 @@ public class CourseModelAssembler implements RepresentationModelAssembler<Course
 
     @Override
     public EntityModel<CourseDto> toModel(CourseDto courseDto) {
+
+        if (courseDto.getCode() == null) {
+            throw new IllegalArgumentException("Course code is required for links generation");
+        }
+
         return EntityModel.of(courseDto,
                 linkTo(methodOn(CourseController.class).findCourse(courseDto.getCode())).withSelfRel(),
                 linkTo(methodOn(CourseController.class).findAllCourses()).withRel("courses"));

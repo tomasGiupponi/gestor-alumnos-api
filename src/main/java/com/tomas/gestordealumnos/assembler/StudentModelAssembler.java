@@ -10,11 +10,15 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class
-StudentModelAssembler implements RepresentationModelAssembler<StudentDto, EntityModel<StudentDto>> {
+public class StudentModelAssembler implements RepresentationModelAssembler<StudentDto, EntityModel<StudentDto>> {
 
     @Override
     public EntityModel<StudentDto> toModel(StudentDto studentDto) {
+
+        if (studentDto.getId() == null ) {
+            throw new IllegalArgumentException("Student id is required for links generation");
+        }
+
         return EntityModel.of(studentDto,
                 linkTo(methodOn(StudentController.class).findStudentById(studentDto.getId())).withSelfRel(),
                 linkTo(methodOn(StudentController.class).findAllStudents()).withRel("students"));

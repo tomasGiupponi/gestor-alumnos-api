@@ -15,6 +15,15 @@ public class EnrollmentModelAssembler implements RepresentationModelAssembler<En
 
     @Override
     public EntityModel<EnrollmentDto> toModel(EnrollmentDto enrollmentDto) {
+
+        if (enrollmentDto.getStudentUuid() == null) {
+            throw new IllegalArgumentException("Student id is required for links generation");
+        }
+
+        if (enrollmentDto.getCourseCode() == null) {
+            throw new IllegalArgumentException("Course code is required for links generation");
+        }
+
         return EntityModel.of(enrollmentDto,
                 linkTo(methodOn(StudentController.class).findStudentById(enrollmentDto.getStudentUuid())).withRel("student"),
                 linkTo(methodOn(CourseController.class).findCourse(enrollmentDto.getCourseCode())).withRel("course"));
