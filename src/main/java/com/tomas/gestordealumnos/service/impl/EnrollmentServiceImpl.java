@@ -55,7 +55,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public List<EnrollmentDto> getEnrollmentsByStudent(UUID studentUuid) {
 
         if (!studentRepository.existsByUuid(studentUuid)) {
-            throw new StudentNotFoundException("Student " + studentUuid + "not found");
+            throw new StudentNotFoundException("Student " + studentUuid + " not found");
         }
 
         return enrollmentRepository.findByStudentUuid(studentUuid)
@@ -81,7 +81,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     public EnrollmentDto updateEnrollment(Long id, EnrollmentUpdateDto enrollmentUpdateDto) {
 
         Enrollment enrollment = enrollmentRepository.findById(id)
-                .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment with id" + id + " not found"));
+                .orElseThrow(() -> new EnrollmentNotFoundException("Enrollment with id " + id + " not found"));
 
         enrollment.setStatus(enrollmentUpdateDto.getEnrollmentStatus());
         enrollment.setFinalGrade(enrollmentUpdateDto.getFinalGrade());
