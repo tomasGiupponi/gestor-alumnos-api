@@ -26,23 +26,13 @@ public class CourseServiceImplTest {
     @InjectMocks
     private CourseServiceImpl courseServiceImpl;
 
-    String code = "01-LYT1";
-    String name = "Lengua y Literatura 1";
-
     @Test
     void saveCourseShouldSaveACourseAndReturnACourseDto() {
 
-        CourseDto courseDto = CourseDto.builder()
-                .code(code)
-                .name(name)
-                .build();
+        Course course = buildDefaultCourse();
+        CourseDto courseDto = buildDefaultCourseDto();
 
-        Course savedCourse = Course.builder()
-                .code(code)
-                .name(name)
-                .build();
-
-        when(courseRepository.save(any(Course.class))).thenReturn(savedCourse);
+        when(courseRepository.save(any(Course.class))).thenReturn(course);
 
         CourseDto result = courseServiceImpl.saveCourse(courseDto);
 
@@ -53,14 +43,13 @@ public class CourseServiceImplTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenCourseCodeAlreadyExists() {
+    void saveCourseShouldThrowExceptionWhenCourseCodeAlreadyExists() {
 
-        CourseDto courseDto = CourseDto.builder()
-                .code(code)
-                .name(name)
-                .build();
+        Course course = buildDefaultCourse();
+        CourseDto courseDto = buildDefaultCourseDto();
+        String courseCode = course.getCode();
 
-        when(courseRepository.existsByCode(code)).thenReturn(true);
+        when(courseRepository.existsByCode(courseCode)).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> courseServiceImpl.saveCourse(courseDto), "should throw IllegalArgumentException");
 
@@ -70,40 +59,34 @@ public class CourseServiceImplTest {
     @Test
     void findCourseByCodeShouldReturnACourseDto() {
 
-        Course course = Course.builder()
-                .code(code)
-                .name(name)
-                .build();
+        Course course = buildDefaultCourse();
+        String courseCode = course.getCode();
 
-        when(courseRepository.findByCode(code)).thenReturn(Optional.of(course));
+        when(courseRepository.findByCode(courseCode)).thenReturn(Optional.of(course));
 
-        CourseDto result = courseServiceImpl.findCourseByCode(code);
+        CourseDto result = courseServiceImpl.findCourseByCode(courseCode);
 
         assertNotNull(result);
         assertEquals(course.getCode(), result.getCode(), "course code must be equal to result code");
-        verify(courseRepository, times(1)).findByCode(code);
+        verify(courseRepository, times(1)).findByCode(courseCode);
     }
 
     @Test
-    void shouldThrowExceptionWhenCourseCodeDoesNotExist() {
+    void findCourseByCodeShouldThrowExceptionWhenCourseCodeDoesNotExist() {
 
-        when(courseRepository.findByCode(code)).thenReturn(Optional.empty());
+        Course course = buildDefaultCourse();
+        String courseCode = course.getCode();
 
-        assertThrows(CourseNotFoundException.class, () -> courseServiceImpl.findCourseByCode(code), "should throw CourseNotFoundException");
+        when(courseRepository.findByCode(courseCode)).thenReturn(Optional.empty());
+
+        assertThrows(CourseNotFoundException.class, () -> courseServiceImpl.findCourseByCode(courseCode), "should throw CourseNotFoundException");
     }
 
     @Test
     void findAllCoursesShouldReturnAListOfCourseDto() {
 
-        Course course1 = Course.builder()
-                .code(code)
-                .name(name)
-                .build();
-
-        Course course2 = Course.builder()
-                .code("01-MAT1")
-                .name("Matemática 1")
-                .build();
+        Course course1 = buildDefaultCourse();
+        Course course2 = buildAnotherDefaultCourse();
 
         List<Course> courses = List.of(course1, course2);
 
@@ -127,65 +110,98 @@ public class CourseServiceImplTest {
     @Test
     void updateCourseShouldReturnAnUpdatedCourseDto() {
 
-        Course existingCourse = Course.builder()
-                .code(code)
-                .name(name)
-                .build();
+        Course course = buildDefaultCourse();
+        Course updatedCourse = buildUpdatedDefaultCourse();
+        CourseDto updatedCourseDto = buildUpdatedDefaultCourseDto();
 
-        CourseDto updateRequestDto = CourseDto.builder()
-                .code(code)
-                .name("LENGUA Y LITERATURA 1")
-                .build();
+        String courseCode = course.getCode();
 
-        Course savedUpdatedCourse = Course.builder()
-                .code(code)
-                .name("LENGUA Y LITERATURA 1")
-                .build();
+        when(courseRepository.findByCode(courseCode)).thenReturn(Optional.of(course));
+        when(courseRepository.save(any(Course.class))).thenReturn(updatedCourse);
 
-        when(courseRepository.findByCode(code)).thenReturn(Optional.of(existingCourse));
-        when(courseRepository.save(any(Course.class))).thenReturn(savedUpdatedCourse);
-
-        CourseDto result = courseServiceImpl.updateCourse(code, updateRequestDto);
+        CourseDto result = courseServiceImpl.updateCourse(courseCode, updatedCourseDto);
 
         assertNotNull(result);
-        assertEquals(existingCourse.getCode(), result.getCode(), "course code must be equal to result code");
-        assertEquals(updateRequestDto.getName(), result.getName(), "course name must be equal to result name");
-        verify(courseRepository, times(1)).findByCode(code);
+        assertEquals(course.getCode(), result.getCode(), "course code must be equal to result code");
+        assertEquals(updatedCourseDto.getName(), result.getName(), "course name must be equal to result name");
+        verify(courseRepository, times(1)).findByCode(courseCode);
         verify(courseRepository, times(1)).save(any(Course.class));
     }
 
     @Test
     void updateCourseShouldThrowCourseNotFoundExceptionWhenCourseCodeDoesNotExist() {
 
-        CourseDto courseDto = CourseDto.builder()
-                .code("01-MAT1")
-                .name("Matemática 1").build();
+        Course course = buildDefaultCourse();
+        CourseDto updatedCourseDto = buildUpdatedDefaultCourseDto();
+        String courseCode = course.getCode();
 
-        when(courseRepository.findByCode(code)).thenReturn(Optional.empty());
+        when(courseRepository.findByCode(courseCode)).thenReturn(Optional.empty());
 
-        assertThrows(CourseNotFoundException.class, () -> courseServiceImpl.updateCourse(code, courseDto));
+        assertThrows(CourseNotFoundException.class, () -> courseServiceImpl.updateCourse(courseCode, updatedCourseDto));
     }
 
     @Test
     void deleteCourseByCodeShouldDeleteACourse() {
 
-        Course course = Course.builder()
-                .code(code)
-                .name(name).build();
+        Course course = buildDefaultCourse();
+        String courseCode = course.getCode();
 
-        when(courseRepository.findByCode(code)).thenReturn(Optional.of(course));
+        when(courseRepository.findByCode(courseCode)).thenReturn(Optional.of(course));
 
-        courseServiceImpl.deleteCourseByCode(code);
+        courseServiceImpl.deleteCourseByCode(courseCode);
 
-        verify(courseRepository, times(1)).findByCode(code);
+        verify(courseRepository, times(1)).findByCode(courseCode);
         verify(courseRepository, times(1)).delete(course);
     }
 
     @Test
     void deleteCourseByCodeShouldThrowCourseNotFoundExceptionWhenCourseCodeDoesNotExist() {
 
-        when(courseRepository.findByCode(code)).thenReturn(Optional.empty());
+        Course course = buildDefaultCourse();
+        String courseCode = course.getCode();
 
-        assertThrows(CourseNotFoundException.class, () -> courseServiceImpl.deleteCourseByCode(code));
+        when(courseRepository.findByCode(courseCode)).thenReturn(Optional.empty());
+
+        assertThrows(CourseNotFoundException.class, () -> courseServiceImpl.deleteCourseByCode(courseCode));
+    }
+
+    private Course buildDefaultCourse() {
+
+        return Course.builder()
+                .code("01-LYT1")
+                .name("Lengua y Literatura 1")
+                .build();
+    }
+
+    private CourseDto buildDefaultCourseDto() {
+
+        return CourseDto.builder()
+                .code("01-LYT1")
+                .name("Lengua y Literatura 1")
+                .build();
+    }
+
+    private Course buildAnotherDefaultCourse() {
+
+        return Course.builder()
+                .code("01-MAT1")
+                .name("Matemática 1")
+                .build();
+    }
+
+    private Course buildUpdatedDefaultCourse() {
+
+        return Course.builder()
+                .code("01-LYT1")
+                .name("LENGUA Y LITERATURA 1")
+                .build();
+    }
+
+    private CourseDto buildUpdatedDefaultCourseDto() {
+
+        return CourseDto.builder()
+                .code("01-LYT1")
+                .name("LENGUA Y LITERATURA 1")
+                .build();
     }
 }
